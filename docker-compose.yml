@@ -22,7 +22,7 @@ services:
             - "3306:3306"
         environment:
             MYSQL_DATABASE: iliad_db
-            MYSQL_USER: user
+            MYSQL_USER: root
             MYSQL_PASSWORD: password
             MYSQL_ROOT_PASSWORD: root_password
         volumes:
