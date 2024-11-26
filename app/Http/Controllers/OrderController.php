@@ -3,10 +3,20 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateOrderRequest;
+use App\Http\Requests\DateRangeRequest;
+use App\Http\Requests\OrderCreateRequest;
+use App\Http\Requests\OrderDeleteRequest;
+use App\Http\Requests\OrderGetRequest;
+use App\Interfaces\OrderItemServiceInterface;
+use App\Interfaces\OrderServiceInterface;
+use App\Interfaces\ProductServiceInterface;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Services\OrderService;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -16,22 +26,49 @@ use Illuminate\Support\Facades\DB;
 class OrderController extends Controller
 {
     /**
-     * Saves a new order
+     * @var ProductServiceInterface
+     */
+    protected ProductServiceInterface $productService;
+    /**
+     * @var OrderItemServiceInterface
+     */
+    private OrderItemServiceInterface $orderItemService;
+    /**
+     * @var OrderServiceInterface
+     */
+    private OrderServiceInterface $orderService;
+
+    /**
+     * @param ProductServiceInterface $productService
+     * @param OrderItemServiceInterface $orderItemService
+     * @param OrderServiceInterface $orderService
+     */
+    public function __construct(
+        ProductServiceInterface $productService,
+        OrderItemServiceInterface $orderItemService,
+        OrderServiceInterface $orderService
+    ) {
+        $this->productService = $productService;
+        $this->orderItemService = $orderItemService;
+        $this->orderService = $orderService;
+    }
+
+    /**
+     * Creates a new order
      *
-     * @param CreateOrderRequest $request
+     * @param OrderCreateRequest $request
      * @return mixed
      */
-    public function create(CreateOrderRequest $request)
+    public function create(OrderCreateRequest $request)
     {
         $validated = $request->validated();
 
         return DB::transaction(
             function () use ($validated) {
-                $customerId = $validated['customer_id'] ?? 0;
+                $customerId = $validated['customer_id'] ?? null;
 
                 // Create the order
-                // We won't load the user's data stored in the DB but instead use what we received
-                // in the payload. The stored data can be used maybe by the FE to fulfill the checkout
+                // We use payload values. The stored data can be used maybe by the FE to fulfill the checkout
                 // fields but the customer should be free to change data on the order
                 $order = Order::create([
                     'customer_id' => $customerId,
@@ -42,11 +79,12 @@ class OrderController extends Controller
                     'status' => Order::ORDER_STATUS_PENDING,
                 ]);
 
+                $total = 0;
                 foreach ($validated['items'] as $item) {
                     /** @var Product $product */
                     $product = Product::findOrFail($item['product_id']);
+                    $total += $product->price * $item['quantity'];
 
-                    $productStock = 0;
                     try {
                         $productStock = $product->stock()->getResults()->quantity;
                     } catch (\Exception $exception) {
@@ -76,6 +114,10 @@ class OrderController extends Controller
                     );
                 }
 
+                // update total on the Order, we couldn't before because we had to save first the Order
+                // before the Order Items to be able to use its Order ID
+                $order->update(['total' => $total]);
+
                 return response()->json(
                     [
                         'message'  => 'Order created successfully',
@@ -85,5 +127,98 @@ class OrderController extends Controller
                 );
             }
         );
+    }
+
+    /**
+     * Deletes an order by its ID.
+     *
+     * @param OrderDeleteRequest $request
+     * @return JsonResponse
+     */
+    public function delete(OrderDeleteRequest $request)
+    {
+        $validated = $request->validated();
+
+        $orderId = $validated['id'];
+        $hardDelete = $validated['hard_delete'] ?? false;
+
+        // Check if the order exists
+        $order = Order::find($orderId);
+
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // if the order exists, it's already Cancelled and we don't need to hard delete it, return
+        if ($order->status === Order::ORDER_STATUS_CANCELLED && !$hardDelete) {
+            return response()->json(['message' => 'Order is already Cancelled']);
+        }
+
+        return DB::transaction(function () use ($order, $hardDelete) {
+            if ($order->status === Order::ORDER_STATUS_PENDING) {
+                // Restore stock for each Order Item related to the Order
+                foreach ($order->items as $item) {
+                    $item->product->stock()->increment('quantity', $item->quantity);
+                }
+            }
+
+            if ($hardDelete) {
+                $this->orderItemService->deleteAllOrderItems($order->id);
+                $order->delete();
+
+                return response()->json(
+                    ['message' => 'Order and associated Items have been deleted permanently'],
+                    200
+                );
+            }
+
+            $order->update(['status' => Order::ORDER_STATUS_CANCELLED]);
+
+            return response()->json(
+                ['message' => 'Order have been marked as Cancelled'],
+                200
+            );
+        });
+    }
+
+    /**
+     * @param $order_id
+     * @return JsonResponse
+     */
+    public function show($order_id)
+    {
+        try {
+            // Find the order by ID, with related order items
+            $order = Order::with('items.product')->findOrFail($order_id);
+
+            // Return the order data
+            return response()->json([
+                'order' => $order
+            ], 200);
+
+        } catch (ModelNotFoundException $exception) {
+            return response()->json([
+                'message' => 'Order not found'
+            ], 404);
+        }
+    }
+
+    /**
+     * @param DateRangeRequest $request
+     * @return JsonResponse
+ */
+    public function getOrderByDateRange(DateRangeRequest $request)
+    {
+        $validated = $request->validated();
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        $orders = $this->orderService->getOrdersBetweenDates($startDate, $endDate);
+
+        return response()->json([
+                'message' => $orders->count() . ' Order' . ($orders->count() === 1 ? '' : 's') . ' found',
+                'orders' => $orders
+        ], 200);
     }
 }

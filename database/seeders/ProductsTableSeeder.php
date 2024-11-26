@@ -45,7 +45,22 @@ class ProductsTableSeeder extends Seeder
             ]
         ];
 
-        DB::table('products')->insert($products);
+        foreach ($products as $productData) {
+            $product = DB::table('products')->insertGetId([
+                'sku' => $productData['sku'],
+                'product_name' => $productData['product_name'],
+                'description' => $productData['description'],
+                'price' => $productData['price'],
+                'created_at' => now(),
+                'updated_at' => null,
+            ]);
+
+            // create fake stock
+            DB::table('inventory')->insert([
+                'product_id' => $product,
+                'quantity' => rand(10, 100),
+            ]);
+        }
     }
 }
 

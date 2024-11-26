@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Models\Product;
-use Database\Factories\ProductFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
 /**
@@ -14,12 +12,14 @@ use Tests\TestCase;
  */
 class CreateOrderTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
-     * Create some Products with factory and test the creation of an Order
+     * @test Create some Products with factory and test the creation of an Order
      *
      * @return void
      */
-    public function test_order_creation_existing_customer()
+    public function test_order_creation_without_customer_id()
     {
         $product = Product::factory()->withStock(100)->create();
 
@@ -29,19 +29,32 @@ class CreateOrderTest extends TestCase
             'customer_address' => '123 Test Street',
             'customer_phone' => '1666-10-10-10',
             'items' => [
-                ['product_id' => $product->id, 'quantity' => 3],
+                [
+                    'product_id' => $product->id,
+                    'quantity' => 3
+                ],
             ],
         ];
 
-        $response = $this->postJson('/api/orders', $payload);
+        $response = $this->postJson('/api/order/create', $payload);
 
+        // assert response status is successful
         $response->assertStatus(201)
             ->assertJsonStructure(['message', 'order_id']);
 
+        // assert we created the order with customer_id = 0
         $this->assertDatabaseHas('orders', [
             'customer_email' => 'test@example.com',
             'customer_address' => '123 Test Street',
             'customer_id' => 0,
         ]);
+
+        // assert the stock has been deducted
+        $this->assertDatabaseHas('inventory', [
+            'product_id' => $product->id,
+            'quantity' => 97,
+        ]);
+
+
     }
 }

@@ -9,6 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @class OrderItem
  * @package App\Models
+ * @property int $id
+ * @property int $order_id
+ * @property int $product_id
+ * @property int $quantity
+ * @property double $price
  */
 class OrderItem extends Model
 {
