@@ -22,6 +22,14 @@ class Inventory extends Model
     protected $fillable = ['product_id', 'quantity'];
 
     /**
+     * @return mixed
+     */
+    public function getQuantityAttribute()
+    {
+        return $this->attributes['quantity'];
+    }
+
+    /**
      * Returns the Product Model of the stock
      *
      * @return BelongsTo
@@ -30,4 +38,6 @@ class Inventory extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+
 }

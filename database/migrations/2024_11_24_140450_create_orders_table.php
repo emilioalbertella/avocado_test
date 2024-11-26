@@ -16,10 +16,12 @@ class CreateOrdersTable extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+            $table->foreignId('customer_id');
             $table->string('customer_email');
             $table->string('customer_name');
             $table->string('customer_address');
+            $table->string('customer_phone');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
