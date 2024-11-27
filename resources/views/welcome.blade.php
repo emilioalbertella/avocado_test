@@ -41,7 +41,7 @@
 <div class="content">
     <div class="title">Avocado Test</div>
     <div class="subtitle">A PHP RESTful backend developer with Laravel to manage Orders </div>
-    <a href="https://app.swaggerhub.com/apis/giovanealbert/avocado_test/1.0.0" target="_blank" class="btn btn-primary">Read Documentation</a>
+    <a href="https://documenter.getpostman.com/view/4960676/2sAYBXAViq" target="_blank" class="btn btn-primary">Read Documentation</a>
 </div>
 </body>
 </html>

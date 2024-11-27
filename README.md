@@ -109,8 +109,7 @@ To connect to the database,
 
 ### Documentation
 At this link you will find a documentation of the API included into the project with example of payloads and the requirements:
-https://app.swaggerhub.com/apis/giovanealbert/avocado_test/1.0.0
-
+https://documenter.getpostman.com/view/4960676/2sAYBXAViq
 
 ## License
 
