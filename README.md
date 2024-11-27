@@ -78,6 +78,18 @@ To ensure everything is working correctly, you can run the project's tests using
 ````
 php artisan test
 ````
+You'll find all the written tests in the root folder /tests
+
+If you want to run a specific test file, you can run:
+````
+php artisan test --filter=ExampleTestFileName
+````
+
+you can use the same command also to test a single method:
+````
+php artisan test --filter=test_example_order_creation
+````
+
 ### Stopping the Containers
 To stop the Docker containers when want to turn down the application, first exit the Docker container with:
 ````

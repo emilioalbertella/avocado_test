@@ -89,7 +89,7 @@ class SearchOrderTest extends TestCase
     public function test_search_without_parameters()
     {
         // Perform a search without any parameters
-        $response = $this->postJson('/api/search', []);
+        $response = $this->postJson('/api/order/search', []);
 
         // Assert that the response contains the appropriate error message
         $response->assertStatus(400)

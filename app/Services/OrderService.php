@@ -39,4 +39,25 @@ class OrderService implements OrderServiceInterface
 
         return $query->with('items')->get();
     }
+
+    /**
+     * @param ?string $name
+     * @param ?string $description
+     * @return Collection|\Illuminate\Database\Eloquent\Builder[]
+     */
+    public function searchOrdersByNameDescription(mixed $name, mixed $description)
+    {
+        $ordersQuery = Order::query();
+
+        if (!empty($name)) {
+            $ordersQuery->where('customer_name', 'like', '%' .$name . '%');
+        }
+
+        if (!empty($description)) {
+            $ordersQuery->where('description', 'like', '%' . $description . '%');
+        }
+
+        //\Illuminate\Support\Facades\Log::info($ordersQuery->toSql(), $ordersQuery->getBindings());
+        return $ordersQuery->with('items')->get();
+    }
 }

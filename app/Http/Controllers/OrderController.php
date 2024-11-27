@@ -229,27 +229,20 @@ class OrderController extends Controller
     public function search(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'nullable|strin',
+            'name' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-
-        if (empty($validated['name']) && empty($validated['description'])) {
+        \Illuminate\Support\Facades\Log::info(print_r($validated, true));
+        if ($validated === []) {
             return response()->json([
                 'message' => 'You must provide either a name or a description.',
             ], 400);
         }
 
-        $ordersQuery = Order::query();
+        $name = $validated['name'] ?? null;
+        $description = $validated['description'] ?? null;
 
-        if (!empty($validated['name'])) {
-            $ordersQuery->orWhere('customer_name', $validated['name']);
-        }
-
-        if (!empty($validated['description'])) {
-            $ordersQuery->orWhere('description', $validated['description']);
-        }
-
-        $orders = $ordersQuery->with('orderItems.product')->get();
+        $orders = $this->orderService->searchOrdersByNameDescription($name, $description) ?? [];
 
         return response()->json($orders, 200);
     }
