@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
     laravel:
-        name: laravel-app
+        container_name: laravel-app
         build:
             context: .
             dockerfile: Dockerfile
@@ -11,14 +11,14 @@ services:
         volumes:
             - .:/var/www/html
             - ./storage:/var/www/html/storage
-        command: /bin/bash -c "chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && apache2-foreground"    
+        command: /bin/bash -c "chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache && apache2-foreground"
         environment:
             APACHE_DOCUMENT_ROOT: /var/www/html/public
         depends_on:
             - mysql80
 
     mysql80:
-        name: mysql
+        container_name: mysql
         image: mysql:8.0
         ports:
             - "3306:3306"
