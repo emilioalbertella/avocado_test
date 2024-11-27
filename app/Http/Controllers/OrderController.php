@@ -232,7 +232,6 @@ class OrderController extends Controller
             'name' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-        \Illuminate\Support\Facades\Log::info(print_r($validated, true));
         if ($validated === []) {
             return response()->json([
                 'message' => 'You must provide either a name or a description.',
