@@ -11,6 +11,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * @class Product
  * @package App\Models
+ * @property int $id
+ * @property string $sku
+ * @property string $product_name
+ * @property string $description
+ * @property double $price
  */
 class Product extends Model
 {
