@@ -25,8 +25,6 @@ Route::prefix('order')->group(function () {
     Route::post('/search', [OrderController::class, 'search']);
     Route::post('/create', [OrderController::class, 'create']);
     Route::delete('/delete', [OrderController::class, 'delete']);
-    Route::post('/get-by-data', [OrderController::class, 'getByName']);
-
     Route::get('/date', [OrderController::class, 'getOrderByDateRange']);
 });
 

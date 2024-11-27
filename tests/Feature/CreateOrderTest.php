@@ -46,7 +46,7 @@ class CreateOrderTest extends TestCase
         $this->assertDatabaseHas('orders', [
             'customer_email' => 'test@example.com',
             'customer_address' => '123 Test Street',
-            'customer_id' => 0,
+            'customer_id' => null,
         ]);
 
         // assert the stock has been deducted

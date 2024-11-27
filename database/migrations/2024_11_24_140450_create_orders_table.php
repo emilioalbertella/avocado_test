@@ -22,6 +22,7 @@ class CreateOrdersTable extends Migration
             $table->string('customer_address');
             $table->string('customer_phone')->default('')->nullable();
             $table->decimal('total', 8, 2)->default(0);
+            $table->string('description')->nullable();
             $table->string('status')->default('pending');
             $table->timestamps();
 

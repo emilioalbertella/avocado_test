@@ -75,7 +75,7 @@ class OrderController extends Controller
                     'customer_email' => $validated['customer_email'],
                     'customer_address' => $validated['customer_address'],
                     'customer_phone' => $validated['customer_address'],
-                    'description' => $validated['description'],
+                    'description' => $validated['description'] ?? null,
                     'status' => Order::ORDER_STATUS_PENDING,
                 ]);
 
@@ -229,27 +229,19 @@ class OrderController extends Controller
     public function search(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'nullable|strin',
+            'name' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
-
-        if (empty($validated['name']) && empty($validated['description'])) {
+        if ($validated === []) {
             return response()->json([
                 'message' => 'You must provide either a name or a description.',
             ], 400);
         }
 
-        $ordersQuery = Order::query();
+        $name = $validated['name'] ?? null;
+        $description = $validated['description'] ?? null;
 
-        if (!empty($validated['name'])) {
-            $ordersQuery->orWhere('customer_name', $validated['name']);
-        }
-
-        if (!empty($validated['description'])) {
-            $ordersQuery->orWhere('description', $validated['description']);
-        }
-
-        $orders = $ordersQuery->with('orderItems.product')->get();
+        $orders = $this->orderService->searchOrdersByNameDescription($name, $description) ?? [];
 
         return response()->json($orders, 200);
     }
