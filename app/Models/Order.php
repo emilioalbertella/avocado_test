@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Interfaces\OrderInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -19,10 +20,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property double $total
  * @property string $status
  */
-class Order extends Model
+class Order extends Model implements OrderInterface
 {
+    /** @var string(s)  */
     public const ORDER_STATUS_PENDING = 'pending';
-    public const ORDER_STATUS_SHIPPED = 'SHIPPED'; // for future store management purpose
+    public const ORDER_STATUS_SHIPPED = 'shipped'; // for future store management purpose
     public const ORDER_STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
@@ -31,6 +33,7 @@ class Order extends Model
         'customer_email',
         'customer_address',
         'customer_phone',
+        'description',
         'status',
         'total'
     ];
@@ -49,7 +52,7 @@ class Order extends Model
      * Retrieve Customer
      * @return BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'customer_id');
     }

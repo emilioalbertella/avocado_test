@@ -13,10 +13,9 @@ use App\Interfaces\ProductServiceInterface;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
-use App\Services\OrderService;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -76,6 +75,7 @@ class OrderController extends Controller
                     'customer_email' => $validated['customer_email'],
                     'customer_address' => $validated['customer_address'],
                     'customer_phone' => $validated['customer_address'],
+                    'description' => $validated['description'],
                     'status' => Order::ORDER_STATUS_PENDING,
                 ]);
 
@@ -206,7 +206,7 @@ class OrderController extends Controller
     /**
      * @param DateRangeRequest $request
      * @return JsonResponse
- */
+    */
     public function getOrderByDateRange(DateRangeRequest $request)
     {
         $validated = $request->validated();
@@ -214,11 +214,43 @@ class OrderController extends Controller
         $startDate = $validated['start_date'] ?? null;
         $endDate = $validated['end_date'] ?? null;
 
-        $orders = $this->orderService->getOrdersBetweenDates($startDate, $endDate);
+        $orders = $this->orderService->getOrdersBetweenDates($startDate, $endDate) ?? [];
 
         return response()->json([
                 'message' => $orders->count() . ' Order' . ($orders->count() === 1 ? '' : 's') . ' found',
                 'orders' => $orders
         ], 200);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function search(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'nullable|strin',
+            'description' => 'nullable|string',
+        ]);
+
+        if (empty($validated['name']) && empty($validated['description'])) {
+            return response()->json([
+                'message' => 'You must provide either a name or a description.',
+            ], 400);
+        }
+
+        $ordersQuery = Order::query();
+
+        if (!empty($validated['name'])) {
+            $ordersQuery->orWhere('customer_name', $validated['name']);
+        }
+
+        if (!empty($validated['description'])) {
+            $ordersQuery->orWhere('description', $validated['description']);
+        }
+
+        $orders = $ordersQuery->with('orderItems.product')->get();
+
+        return response()->json($orders, 200);
     }
 }

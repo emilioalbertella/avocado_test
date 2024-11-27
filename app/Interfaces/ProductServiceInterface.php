@@ -9,6 +9,7 @@ namespace App\Interfaces;
 interface ProductServiceInterface
 {
     /**
+     * Returns all catalog Products
      * @return mixed
      */
     public function getAllProducts();
