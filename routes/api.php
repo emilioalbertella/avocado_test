@@ -25,6 +25,7 @@ Route::prefix('order')->group(function () {
     Route::post('/search', [OrderController::class, 'search']);
     Route::post('/create', [OrderController::class, 'create']);
     Route::delete('/delete', [OrderController::class, 'delete']);
+    Route::post('/get-by-data', [OrderController::class, 'getByName']);
 
     Route::get('/date', [OrderController::class, 'getOrderByDateRange']);
 });
@@ -36,16 +37,13 @@ Route::prefix('order')->group(function () {
 
 Route::get('/db-test', function () {
     try {
-        // Test database connection
         DB::connection()->getPdo();
 
-        // Return success response if database is connected
         return response()->json([
             'message' => 'Database connection successful!',
             'status' => 'success'
-        ], 200);
+        ]);
     } catch (\Exception $e) {
-        // Return error if database connection fails
         return response()->json([
             'message' => 'Database connection failed: ' . $e->getMessage(),
             'status' => 'error'

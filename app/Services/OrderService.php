@@ -3,9 +3,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Interfaces\OrderInterface;
 use App\Interfaces\OrderServiceInterface;
 use App\Models\Order;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * @class OrderService
@@ -16,10 +18,10 @@ class OrderService implements OrderServiceInterface
     /**
      * @param $startDate
      * @param $endDate
-     * @return \Illuminate\Database\Eloquent\Collection|array
+     * @return Collection|array
      */
-    public function getOrdersBetweenDates($startDate, $endDate = null)
-    : \Illuminate\Database\Eloquent\Collection|array {
+    public function getOrdersBetweenDates($startDate, $endDate = null): Collection|array
+    {
         $query = Order::query();
 
         if ($startDate && $endDate) {

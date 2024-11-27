@@ -12,6 +12,8 @@ Ensure that Docker is installed and running on your machine. You can verify this
 ```
 docker --version
 ```
+This is the official documentation on how to do it:
+https://docs.docker.com/compose/install/
 
 #### Move to this directory with a terminal application
 
@@ -76,20 +78,27 @@ To ensure everything is working correctly, you can run the project's tests using
 ````
 php artisan test
 ````
+### Stopping the Containers
+To stop the Docker containers when want to turn down the application, first exit the Docker container with:
+````
+exit
+````
+then from you terminal, run
+````
+docker-compose down
+````
 
 ### Database Structure
-This is a graphic diagram of the Database structure with all the relations
+This is a graphic diagram of the Database structure with all the relations:
 ![DB schema](resources/images/db_schema.png)
+https://dbdiagram.io/d/67476158e9daa85acaed646a
+
+To connect to the database,  
 
 ### Documentation
 At this link you will find a documentation of the API included into the project with example of payloads and the requirements:
 https://app.swaggerhub.com/apis/giovanealbert/avocado_test/1.0.0
 
-### Stopping the Containers
-To stop the Docker containers when you're done, run:
-````
-docker-compose up
-````
 
 ## License
 

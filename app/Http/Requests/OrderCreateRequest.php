@@ -31,6 +31,7 @@ class OrderCreateRequest extends FormRequest
             'customer_email' => 'required|email',
             'customer_address' => 'required|string',
             'customer_phone' => 'required|string',
+            'description' => 'nullable|string',
             'items' => 'required|array',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity' => 'required|integer|min:1',
