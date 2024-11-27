@@ -75,7 +75,7 @@ class OrderController extends Controller
                     'customer_email' => $validated['customer_email'],
                     'customer_address' => $validated['customer_address'],
                     'customer_phone' => $validated['customer_address'],
-                    'description' => $validated['description'],
+                    'description' => $validated['description'] ?? null,
                     'status' => Order::ORDER_STATUS_PENDING,
                 ]);
 
