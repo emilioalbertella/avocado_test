@@ -58,6 +58,16 @@ or performing this simple curl on a test API
 curl http://0.0.0.0:8080/api/test-installation
 ````
 
+The database will be reachable here:
+````
+host: 0.0.0.0:3306
+db_name: avocado_db
+user: user
+password: password
+root_user: root
+root_password: root_password
+````
+
 ### 3. Running Laravel Commands
 Now that your Docker environment is set up, you can run Laravel-specific commands to set up the database, seed data, and execute tests.
 
